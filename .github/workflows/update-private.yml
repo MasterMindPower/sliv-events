@@ -1,0 +1,32 @@
+name: Update Files
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '*/10 * * * *'  # runs every 15 minutes
+
+jobs:
+  update-files:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Public Repo
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 1
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.11
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests cryptography
+
+      - name: Run loader script
+        env:
+          PRIVATE_REPO_URL: https://x-access-token:${{ secrets.PRIVATE_REPO_TOKEN }}@github.com/MasterMindPower/sliv_plays.git
+          FERNET_KEY: ${{ secrets.FERNET_KEY }}
+        run: python -u script/live-main-loader.py
